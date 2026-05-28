@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,16 +5,41 @@
   <title>Livre Samia Mejri</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #333; }
-    iframe {
-      width: 100vw;
+    html, body { width: 100%; height: 100%; background: #333; }
+    #pdf-container {
+      width: 100%;
       height: 100vh;
-      border: none;
-      display: block;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+    canvas { margin: 10px 0; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
-  <iframe src="https://docs.google.com/viewer?url=https://livresamiamejri.org/Livre%20samia%20mejri.pdf&embedded=true"></iframe>
+  <div id="pdf-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const url = 'https://livresamiamejri.org/Livre%20samia%20mejri.pdf';
+    const container = document.getElementById('pdf-container');
+
+    pdfjsLib.getDocument(url).promise.then(pdf => {
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          container.appendChild(canvas);
+          page.render({ canvasContext: canvas.getContext('2d'), viewport });
+        });
+      }
+    });
+  </script>
 </body>
 </html>
